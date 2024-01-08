@@ -3,9 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophone, faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import logo from './Assets/icons8-expert-ios-16-filled/icon.png'
-import { ChatOpenAI } from "langchain/chat_models/openai"
-import { PromptTemplate } from "langchain/prompts";
-
 
 import {
   ClerkProvider,
@@ -19,7 +16,6 @@ import {
 
 
 
-
 const clerkPubKey = "pk_test_cGVhY2VmdWwtbW9zcXVpdG8tMzYuY2xlcmsuYWNjb3VudHMuZGV2JA";
 const openAIApiKey = "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"
 
@@ -29,16 +25,7 @@ export default function GPT() {
     const [inputValue, setInputValue] = useState('');
 
  
-    async function gpt(){
 
-      const llm = new ChatOpenAI ({ openAIApiKey })
-      const tweetTemplate = 'Generate a promotional tweet for a product, from this product description:{productDesc}'
-      const tweetPrompt = PromptTemplate.fromTemplate(tweetTemplate)
-      const tweetChain = tweetPrompt.pipe (llm)
-      const response = await tweetChain.invoke({productDesc: 'Electric shoes'})
-      console.log(response.content)
-
-    } 
 
   const handleNewQuery = () => {
     // Logic for handling a new query
@@ -48,17 +35,17 @@ export default function GPT() {
     setQueries([]);
   };
 
-  const handleSettings = () => {
-    // Logic for handling settings
-  };
+function result(){
+  setQueries([...queries, inputValue]);
+  setInputValue('');
+  resetTranscript();
+}
 
-  const handleLogout = () => {
-    // Logic for logout
-  };
+
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (inputValue.trim()) {
+    if (listening && inputValue.trim()) {
       setQueries([...queries, inputValue]);
       setInputValue('');
       resetTranscript();
@@ -66,7 +53,9 @@ export default function GPT() {
   };
 
   const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+    if (!listening) {
+      setInputValue(event.target.value);
+    }
   };
 
   const startListening = () => {
@@ -104,13 +93,32 @@ export default function GPT() {
       {/* Main Content */}
       <div className="w-3/4 p-4 flex flex-col justify-between">
         <div className="text-center ">
-  
+ 
           <h1 className="text-4xl font-semibold mb-4  " style={{position:'absolute' , left:"55%", bottom:"70%" }} >HR Expert System</h1>
           <img src={logo} alt="Logo" style={{position:'absolute' , left:"60%", bottom:"50%" }} />
         </div>
         <form className="flex border-t border-gray-300 pt-4" onSubmit={handleSubmit}>
-          <input type="text" value={transcript}  onChange={handleInputChange  } className="flex-grow p-2 border border-gray-300 rounded" placeholder="Enter your Query Here" />
-          <button type="submit" className="p-2 ml-2 rounded-md border border-black border-opacity-10 shadow bg-white text-zinc-700 text-sm font-normal">Search</button>
+          {listening ? (
+            // If listening, disable manual input
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              className="flex-grow p-2 border border-gray-300 rounded"
+              placeholder="Listening..."
+              disabled
+            />
+          ) : (
+            // If not listening, enable manual input
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              className="flex-grow p-2 border border-gray-300 rounded"
+              placeholder="Enter your Query Here"
+            />
+          )}
+          <button type="submit" onClick={result} className="p-2 ml-2 rounded-md border border-black border-opacity-10 shadow bg-white text-zinc-700 text-sm font-normal">Search</button>
 
           {/* Mic Icon Button */}
           <button onClick={listening ? stopListening : startListening} className="p-2 ml-2">
