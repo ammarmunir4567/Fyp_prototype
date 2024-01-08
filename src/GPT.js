@@ -28,7 +28,8 @@ export default function GPT() {
 
 
   const handleNewQuery = () => {
-    // Logic for handling a new query
+    setQueries([...queries, inputValue]);
+   setInputValue("");
   };
 
   const handleClearConversations = () => {
